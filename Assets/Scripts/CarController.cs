@@ -40,6 +40,15 @@ public class CarController : MonoBehaviour
     [SerializeField] private float suspensionDamper = 1000f; // Amortecimento da suspensão
     [SerializeField] private float suspensionDistance = 0.3f; // Distância da suspensão
 
+    [Header("Shooting")]
+    [SerializeField] private GameObject bulletPrefab;  // Prefab do projétil
+    [SerializeField] private Transform firePoint;      // Ponto de onde o tiro será disparado
+    [SerializeField] private float bulletSpeed = 10f;  // Velocidade do projétil
+    [SerializeField] private float fireRate = 0.5f;    // Intervalo entre os disparos
+
+    private float nextFireTime = 0f; // Controle do tempo para o próximo disparo
+    public static int score = 0;     // Pontuação
+
     private void Start()
     {
         // Ajustando a suspensão para o estilo de jeep
@@ -54,6 +63,26 @@ public class CarController : MonoBehaviour
         UpdateWheels();
         RestartPosition(); 
         HandleHandbrake();
+    }
+
+    private void Update()
+    {
+        // Verifica se o tempo para disparar foi atingido e se o jogador pressionou o botão de disparo
+        if (Time.time >= nextFireTime && Input.GetKeyDown(KeyCode.Space)) 
+        {
+            Shoot();
+            nextFireTime = Time.time + fireRate; // Atualiza o tempo para o próximo disparo
+        }
+    }
+
+    private void Shoot()
+    {
+        // Instancia o projétil na posição do ponto de disparo
+        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        
+        // Obtém o Rigidbody2D do projétil e define sua velocidade
+        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+        rb.velocity = firePoint.right * bulletSpeed; // A direção do projétil segue o eixo X (direção do "firePoint")
     }
 
     private void GetInput()
@@ -167,4 +196,9 @@ public class CarController : MonoBehaviour
         rearRightWheelCollider.brakeTorque = 0f;
     }
 
+    // Método para exibir a pontuação (pode ser usado com UI)
+    public static void DisplayScore()
+    {
+        Debug.Log("Pontuação: " + score);
+    }
 }
